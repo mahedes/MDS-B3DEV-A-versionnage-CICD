@@ -3,28 +3,39 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>To-do list app</title>
+	<title>To-do List App - Task Manager</title>
+	<meta name="description" content="Simple and efficient task management application">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="css/base.css">
 	<link rel="stylesheet" href="css/index.css">
 </head>
 
 <body>
-	<section class="todoapp">
+	<section class="todoapp" role="main">
 		<header class="header">
 			<h1>todos</h1>
-			<p>bonjour j'ai reussi a créer ma branch (thibault)</p>
-			<input class="new-todo" placeholder="What needs to be done?" autofocus>
+			
+			<input 
+				class="new-todo" 
+				placeholder="What needs to be done?" 
+				autofocus
+				aria-label="Add a new todo item"
+			>
 		</header>
+		
 		<section class="main">
-			<input class="toggle-all" type="checkbox">
+			<input id="toggle-all" class="toggle-all" type="checkbox">
 			<label for="toggle-all">Mark all as complete</label>
-			<ul class="todo-list"></ul>
+			
+			<ul class="todo-list" role="list"></ul>
 		</section>
+		
 		<footer class="footer">
-			<span class="todo-count"></span>
-			<ul class="filters">
+			<span class="todo-count" aria-live="polite"></span>
+			
+			<ul class="filters" role="navigation">
 				<li>
-					<a href="#/" class="selected">All</a>
+					<a href="#/" class="selected" aria-current="page">All</a>
 				</li>
 				<li>
 					<a href="#/active">Active</a>
@@ -33,13 +44,16 @@
 					<a href="#/completed">Completed</a>
 				</li>
 			</ul>
-			<button class="clear-completed">Clear completed</button>
+			
+			<button class="clear-completed" aria-label="Clear all completed tasks">Clear completed</button>
 		</footer>
 	</section>
+	
 	<footer class="info">
 		<p>Double-click to edit a todo</p>
 		<p>Created by Oscar Godson</p>
 		<p>Refactored by Christoph Burgmer</p>
+		<p>Enhanced by Thibault - Group A</p>
 	</footer>
 
 </body>
