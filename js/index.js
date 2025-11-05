@@ -19,9 +19,28 @@ input.addEventListener("keypress", function (event) {
       applyFilter();
     });
 
+    // Texte de la tâche
     const textSpan = document.createElement("span");
     textSpan.textContent = task;
 
+    // Date de création
+    const dateSpan = document.createElement("span");
+    const now = new Date();
+    const dateFormatted = now.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+    const timeFormatted = now.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+    dateSpan.textContent = ` (${dateFormatted} - ${timeFormatted})`;
+    dateSpan.style.fontSize = "0.9em";
+    dateSpan.style.color = "#888";
+    dateSpan.style.marginLeft = "8px";
+
+    // Bouton supprimer
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "delete";
     deleteBtn.classList.add("destroy");
@@ -31,8 +50,10 @@ input.addEventListener("keypress", function (event) {
       applyFilter();
     });
 
+    // Assemblage des éléments
     li.appendChild(checkbox);
     li.appendChild(textSpan);
+    li.appendChild(dateSpan);
     li.appendChild(deleteBtn);
 
     list.appendChild(li);
