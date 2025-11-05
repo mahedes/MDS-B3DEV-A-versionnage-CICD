@@ -1,48 +1,148 @@
 <!DOCTYPE html>
 <html lang="en" data-framework="javascript">
-  <head>
-    <meta charset="utf-8" >
-    <title>To-do list app</title>
-    <link rel="stylesheet" href="css/base.css" >
-    <link rel="stylesheet" href="css/index.css" >
-  </head>
+<head>
+	<meta charset="utf-8">
+	<title>TodoList Pro - Task Manager</title>
+	<meta name="description" content="Advanced task management application with categories and priorities">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+	<div class="app-container">
+		<!-- Header avec sélecteur de langue -->
+		<header class="app-header">
+			<div class="header-top">
+				<h1>📝 TodoList Pro</h1>
+				<div class="language-switcher">
+					<button class="lang-btn active" data-lang="en">EN</button>
+					<button class="lang-btn" data-lang="fr">FR</button>
+				</div>
+			</div>
+			<p>Organize your tasks efficiently</p>
+		</header>
 
-  <body>
-    <section class="todoapp">
-      <header class="header">
-        <h1>todos</h1>
-        <input
-          class="new-todo"
-          placeholder="What needs to be done?"
-          autofocus
-        >
-      </header>
-      <div class="main">
-        <input id="toggle-all" class="toggle-all" type="checkbox" >
-        <label for="toggle-all">Mark all as complete</label>
-        <ul class="todo-list"></ul>
-      </div>
-      <footer class="footer">
-        <span class="todo-count"></span>
-        <ul class="filters">
-          <li>
-            <a href="#/" class="selected">All</a>
-          </li>
-          <li>
-            <a href="#/active">Active</a>
-          </li>
-          <li>
-            <a href="#/completed">Completed</a>
-          </li>
-        </ul>
-        <button class="clear-completed">Clear completed</button>
-      </footer>
-    </section>
-    <footer class="info">
-      <p>Double-click to edit a todo</p>
-      <p>Created by Oscar Godson</p>
-      <p>Refactored by Christoph Burgmer</p>
-    </footer>
-    <script src="js/index.js"></script>
-  </body>
+		<!-- Main Content -->
+		<main class="main-content">
+			<!-- Sidebar -->
+			<aside class="sidebar">
+				<button class="btn-primary new-list-btn">
+					➕ New List
+				</button>
+				
+				<nav class="categories">
+					<h3>Categories</h3>
+					<ul>
+						<li class="active"><a href="#today">📅 Today</a></li>
+						<li><a href="#tomorrow">⏰ Tomorrow</a></li>
+						<li><a href="#later">📌 Later</a></li>
+						<li><a href="#work">💼 Work</a></li>
+						<li><a href="#personal">🏠 Personal</a></li>
+					</ul>
+				</nav>
+
+				<div class="stats">
+					<h3>Statistics</h3>
+					<div class="stat-item">
+						<span class="stat-label">Total Tasks:</span>
+						<span class="stat-value" id="total-tasks">0</span>
+					</div>
+					<div class="stat-item">
+						<span class="stat-label">Completed:</span>
+						<span class="stat-value" id="completed-tasks">0</span>
+					</div>
+					<div class="stat-item">
+						<span class="stat-label">Pending:</span>
+						<span class="stat-value" id="pending-tasks">0</span>
+					</div>
+				</div>
+			</aside>
+
+			<!-- Tasks Area -->
+			<section class="tasks-area">
+				<!-- Today's Tasks -->
+				<div class="task-category active" id="today">
+					<div class="category-header">
+						<h2>📅 Today's Tasks</h2>
+						<span class="task-count">0 tasks</span>
+					</div>
+					
+					<div class="task-input-container">
+						<input type="text" class="task-input" placeholder="Type and hit Enter to add a new task...">
+						<button class="add-task-btn">Add</button>
+					</div>
+
+					<div class="tasks-list">
+						<div class="empty-state" id="today-empty">
+							<p>No items. Why not add one below?</p>
+						</div>
+						<!-- Tasks will be added here dynamically -->
+					</div>
+				</div>
+
+				<!-- Tomorrow's Tasks -->
+				<div class="task-category" id="tomorrow">
+					<div class="category-header">
+						<h2>⏰ Tomorrow</h2>
+						<span class="task-count">0 tasks</span>
+					</div>
+					
+					<div class="task-input-container">
+						<input type="text" class="task-input" placeholder="Type and hit Enter to add a task for tomorrow...">
+						<button class="add-task-btn">Add</button>
+					</div>
+
+					<div class="tasks-list">
+						<div class="empty-state">
+							<p>No tasks scheduled for tomorrow.</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Later Tasks -->
+				<div class="task-category" id="later">
+					<div class="category-header">
+						<h2>📌 Later</h2>
+						<span class="task-count">0 tasks</span>
+					</div>
+					
+					<div class="task-input-container">
+						<input type="text" class="task-input" placeholder="Type and hit Enter to add a task for later...">
+						<button class="add-task-btn">Add</button>
+					</div>
+
+					<div class="tasks-list">
+						<div class="empty-state">
+							<p>No tasks scheduled for later.</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Done Tasks -->
+				<div class="task-category" id="done">
+					<div class="category-header">
+						<h2>✅ Done</h2>
+						<span class="task-count">0 tasks</span>
+					</div>
+
+					<div class="tasks-list">
+						<div class="empty-state">
+							<p>No done items yet. Complete some tasks!</p>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<!-- Footer -->
+		<footer class="app-footer">
+			<p>Enhanced by Thibault - Group A</p>
+			<div class="footer-links">
+				<button class="btn-secondary" id="clear-completed">Clear Completed</button>
+				<button class="btn-secondary" id="export-tasks">Export Tasks</button>
+			</div>
+		</footer>
+	</div>
+
+	<script src="js/app.js"></script>
+</body>
 </html>
