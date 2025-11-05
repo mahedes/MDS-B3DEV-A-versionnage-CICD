@@ -174,17 +174,27 @@ label[for="toggle-all"] {
 }
 
 .todo-list li .toggle {
-  text-align: center;
-  width: 40px;
-  /* auto, since non-WebKit browsers doesn't support input styling */
-  height: auto;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
-  border: none; /* Mobile Safari */
+  width: 5%;
+  height:auto;
+  position: static;
+  vertical-align: middle;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  transition: border-color 0.2s;
+  box-shadow: none;
+  display: inline-block;
+}
+
+.todo-list li .toggle:checked {
+  border-color: #5dc2af;
+  background: #5dc2af;
+}
+
+.todo-list li .toggle:focus {
+  outline: 2px solid #5dc2af;
 }
 
 .todo-list li .toggle:after {

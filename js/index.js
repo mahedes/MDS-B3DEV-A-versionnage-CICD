@@ -9,6 +9,16 @@ input.addEventListener("keypress", function (event) {
 
     const li = document.createElement("li");
 
+    // Ajout de la case à cocher
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.classList.add("toggle");
+    checkbox.addEventListener("change", () => {
+      li.classList.toggle("completed", checkbox.checked);
+      updateCount();
+      applyFilter();
+    });
+
     const textSpan = document.createElement("span");
     textSpan.textContent = task;
 
@@ -18,8 +28,10 @@ input.addEventListener("keypress", function (event) {
     deleteBtn.addEventListener("click", () => {
       li.remove();
       updateCount();
+      applyFilter();
     });
 
+    li.appendChild(checkbox);
     li.appendChild(textSpan);
     li.appendChild(deleteBtn);
 
@@ -27,10 +39,27 @@ input.addEventListener("keypress", function (event) {
 
     input.value = "";
     updateCount();
+    applyFilter();
   }
 });
 
 function updateCount() {
-  const items = document.querySelectorAll(".todo-list li").length;
+  const items = document.querySelectorAll(".todo-list li:not(.completed)").length;
   counter.textContent = `${items} item${items !== 1 ? "s" : ""} left`;
 }
+
+// Filtrage des tâches selon le hash
+function applyFilter() {
+  const hash = window.location.hash;
+  document.querySelectorAll(".todo-list li").forEach(li => {
+    if (hash === "#/completed") {
+      li.style.display = li.classList.contains("completed") ? "" : "none";
+    } else if (hash === "#/active") {
+      li.style.display = !li.classList.contains("completed") ? "" : "none";
+    } else {
+      li.style.display = "";
+    }
+  });
+}
+
+window.addEventListener("hashchange", applyFilter);
