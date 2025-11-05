@@ -19,3 +19,4 @@ function updateCount() {
   const items = document.querySelectorAll(".todo-list li").length;
   counter.textContent = `${items} item${items !== 1 ? "s" : ""} left`;
 }
+ 
