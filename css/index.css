@@ -152,15 +152,6 @@ label[for="toggle-all"] {
   font-size: 24px;
   border-bottom: 1px solid #ededed;
 }
-.todo-list li button.destroy {
-  background-color: #e74c3c;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 2px 4px;
-  font-size: 10px;
-  border-radius: 3px;
-}
 
 .todo-list li:last-child {
   border-bottom: none;
@@ -183,17 +174,27 @@ label[for="toggle-all"] {
 }
 
 .todo-list li .toggle {
-  text-align: center;
-  width: 40px;
-  /* auto, since non-WebKit browsers doesn't support input styling */
-  height: auto;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
-  border: none; /* Mobile Safari */
+  width: 5%;
+  height:auto;
+  position: static;
+  vertical-align: middle;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  transition: border-color 0.2s;
+  box-shadow: none;
+  display: inline-block;
+}
+
+.todo-list li .toggle:checked {
+  border-color: #5dc2af;
+  background: #5dc2af;
+}
+
+.todo-list li .toggle:focus {
+  outline: 2px solid #5dc2af;
 }
 
 .todo-list li .toggle:after {
@@ -222,16 +223,18 @@ label[for="toggle-all"] {
 .todo-list li .destroy {
   display: none;
   position: absolute;
-  top: 0;
-  right: 10px;
-  bottom: 0;
-  width: 40px;
-  height: 40px;
-  margin: auto 0;
-  font-size: 30px;
+  top: 50%;
+  right: 25px;
+  transform: translateY(-50%);
+  width: clamp(20px, 3vw, 26px);
+  height: clamp(20px, 3vw, 26px);
+  font-size: clamp(14px, 2.5vw, 20px);
   color: #cc9a9a;
-  margin-bottom: 11px;
-  transition: color 0.2s ease-out;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .todo-list li .destroy:hover {
@@ -243,7 +246,13 @@ label[for="toggle-all"] {
 }
 
 .todo-list li:hover .destroy {
-  display: block;
+  display: flex;
+}
+
+@media screen and (max-width: 480px) {
+  .todo-list li .destroy {
+    right: 5px;
+  }
 }
 
 .todo-list li .edit {
