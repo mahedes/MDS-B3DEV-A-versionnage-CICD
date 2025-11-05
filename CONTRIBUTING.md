@@ -1,5 +1,4 @@
-Contribution Guide
-============
+# Contribution Guide
 
 ### How to contribute to the project:
 
@@ -11,15 +10,15 @@ Contribution Guide
 
 ```bash
 $ git checkout -b feature-YourName-NameOfFunctionnality
-``` 
+```
 
 4. Push this new branch in this repository GitHub
+
 ```bash
 git push origin your-branch
-``` 
-        
-5. Create a new pull request by comparing your branch and DEV branch
+```
 
+5. Create a new pull request by comparing your branch and DEV branch
 
 ### Quality process :
 
@@ -31,8 +30,6 @@ Once your improvements have been made, you can make a pull request on the main r
 
 In your pull request you will be sure to remember if this is a feature or a bug fix and you will choose the right label accordingly.
 
-
 ### Improvement idea for contribution :
 
 - Some idea here => http://todolistme.net/
-
