@@ -1,68 +1,226 @@
 <!DOCTYPE html>
 <html lang="en" data-framework="javascript">
-  <head>
-    <meta charset="utf-8" >
-    <title>To-do list app</title>
-    <link rel="stylesheet" href="css/base.css" >
-    <link rel="stylesheet" href="css/index.css" >
-  </head>
-
 <head>
-	<meta charset="utf-8">
-	<title>To-do List App - Task Manager</title>
-	<meta name="description" content="Simple and efficient task management application">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	
+    <meta charset="utf-8">
+    <title>TodoList Pro - Task Manager</title>
+    <meta name="description" content="Advanced task management application with categories and priorities">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/index.css">
 </head>
-
 <body>
-	<section class="todoapp" role="main">
-		<header class="header">
-			<h1>todos</h1>
-			
-			<input 
-				class="new-todo" 
-				placeholder="What needs to be done?" 
-				autofocus
-				aria-label="Add a new todo item"
-			>
-		</header>
-		
-		<section class="main">
-			<input id="toggle-all" class="toggle-all" type="checkbox">
-			<label for="toggle-all">Mark all as complete</label>
-			
-			<ul class="todo-list" role="list"></ul>
-		</section>
-		
-		<footer class="footer">
-			<span class="todo-count" aria-live="polite"></span>
-			
-			<ul class="filters" role="navigation">
-				<li>
-					<a href="#/" class="selected" aria-current="page">All</a>
-				</li>
-				<li>
-					<a href="#/active">Active</a>
-				</li>
-				<li>
-					<a href="#/completed">Completed</a>
-				</li>
-			</ul>
-			
-			<button class="clear-completed" aria-label="Clear all completed tasks">Clear completed</button>
-		</footer>
-	</section>
-	
-	<footer class="info">
-		<p>Double-click to edit a todo</p>
-		<p>Created by Oscar Godson</p>
-		<p>Refactored by Christoph Burgmer</p>
-		<p>Enhanced by Thibault - Group A</p>
-	</footer>
+    <div class="app-container">
+        <!-- Header avec sélecteur de langue -->
+        <header class="app-header">
+            <div class="header-top">
+                <h1>📝 TodoList Pro</h1>
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+            </div>
+            <p>Organize your tasks efficiently</p>
+        </header>
 
-	<!-- Intégration du JavaScript -->
-	<script src="js/app.js"></script>
+        <!-- Contenu principal -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <button class="new-list-btn">+ New List</button>
+
+                <div class="categories">
+                    <h3>Categories</h3>
+                    <ul>
+                        <li class="active"><a href="#" data-category="all">All Tasks</a></li>
+                        <li><a href="#" data-category="work">Work</a></li>
+                        <li><a href="#" data-category="personal">Personal</a></li>
+                        <li><a href="#" data-category="shopping">Shopping</a></li>
+                    </ul>
+                </div>
+
+                <div class="stats">
+                    <h3>Stats</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Tasks</span>
+                        <span class="stat-value" id="total-tasks">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Completed</span>
+                        <span class="stat-value" id="completed-tasks">0</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Zone des tâches -->
+            <div class="tasks-area">
+                <!-- Exemple de catégorie de tâches -->
+                <div class="task-category active" id="category-all">
+                    <div class="category-header">
+                        <h2>All Tasks</h2>
+                        <span class="task-count" id="all-tasks-count">0</span>
+                    </div>
+
+                    <div class="task-input-container">
+                        <input type="text" class="task-input" placeholder="Add a new task..." aria-label="Add a new task">
+                        <button class="add-task-btn">Add</button>
+                    </div>
+
+                    <ul class="tasks-list" id="all-tasks-list" role="list">
+                        <!-- Les tâches seront ajoutées ici dynamiquement -->
+                        <div class="empty-state">No tasks yet. Add one above!</div>
+                    </ul>
+                </div>
+
+                <!-- Autres catégories (cachées par défaut) -->
+                <div class="task-category" id="category-work">
+                    <div class="category-header">
+                        <h2>Work</h2>
+                        <span class="task-count" id="work-tasks-count">0</span>
+                    </div>
+                    <ul class="tasks-list" id="work-tasks-list" role="list"></ul>
+                </div>
+
+                <div class="task-category" id="category-personal">
+                    <div class="category-header">
+                        <h2>Personal</h2>
+                        <span class="task-count" id="personal-tasks-count">0</span>
+                    </div>
+                    <ul class="tasks-list" id="personal-tasks-list" role="list"></ul>
+                </div>
+
+                <div class="task-category" id="category-shopping">
+                    <div class="category-header">
+                        <h2>Shopping</h2>
+                        <span class="task-count" id="shopping-tasks-count">0</span>
+                    </div>
+                    <ul class="tasks-list" id="shopping-tasks-list" role="list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>© 2025 TodoList Pro. All rights reserved.</p>
+            <div class="footer-links">
+                <button class="btn-secondary">About</button>
+                <button class="btn-secondary">Help</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Intégration du JavaScript -->
+    <script src="js/app.js"></script>
 </body>
+</html>
+<!DOCTYPE html>
+<html lang="en" data-framework="javascript">
+<head>
+    <meta charset="utf-8">
+    <title>TodoList Pro - Task Manager</title>
+    <meta name="description" content="Advanced task management application with categories and priorities">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header avec sélecteur de langue -->
+        <header class="app-header">
+            <div class="header-top">
+                <h1>📝 TodoList Pro</h1>
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+            </div>
+            <p>Organize your tasks efficiently</p>
+        </header>
 
+        <!-- Contenu principal -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <button class="new-list-btn">+ New List</button>
+
+                <div class="categories">
+                    <h3>Categories</h3>
+                    <ul>
+                        <li class="active"><a href="#" data-category="all">All Tasks</a></li>
+                        <li><a href="#" data-category="work">Work</a></li>
+                        <li><a href="#" data-category="personal">Personal</a></li>
+                        <li><a href="#" data-category="shopping">Shopping</a></li>
+                    </ul>
+                </div>
+
+                <div class="stats">
+                    <h3>Stats</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Tasks</span>
+                        <span class="stat-value" id="total-tasks">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Completed</span>
+                        <span class="stat-value" id="completed-tasks">0</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Zone des tâches -->
+            <div class="tasks-area">
+                <!-- Exemple de catégorie de tâches -->
+                <div class="task-category active" id="category-all">
+                    <div class="category-header">
+                        <h2>All Tasks</h2>
+                        <span class="task-count" id="all-tasks-count">0</span>
+                    </div>
+
+                    <div class="task-input-container">
+                        <input type="text" class="task-input" placeholder="Add a new task..." aria-label="Add a new task">
+                        <button class="add-task-btn">Add</button>
+                    </div>
+
+                    <ul class="tasks-list" id="all-tasks-list" role="list">
+                        <!-- Les tâches seront ajoutées ici dynamiquement -->
+                        <div class="empty-state">No tasks yet. Add one above!</div>
+                    </ul>
+                </div>
+
+                <!-- Autres catégories (cachées par défaut) -->
+                <div class="task-category" id="category-work">
+                    <div class="category-header">
+                        <h2>Work</h2>
+                        <span class="task-count" id="work-tasks-count">0</span>
+                    </div>
+                    <ul class="tasks-list" id="work-tasks-list" role="list"></ul>
+                </div>
+
+                <div class="task-category" id="category-personal">
+                    <div class="category-header">
+                        <h2>Personal</h2>
+                        <span class="task-count" id="personal-tasks-count">0</span>
+                    </div>
+                    <ul class="tasks-list" id="personal-tasks-list" role="list"></ul>
+                </div>
+
+                <div class="task-category" id="category-shopping">
+                    <div class="category-header">
+                        <h2>Shopping</h2>
+                        <span class="task-count" id="shopping-tasks-count">0</span>
+                    </div>
+                    <ul class="tasks-list" id="shopping-tasks-list" role="list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>© 2025 TodoList Pro. All rights reserved.</p>
+            <div class="footer-links">
+                <button class="btn-secondary">About</button>
+                <button class="btn-secondary">Help</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Intégration du JavaScript -->
+    <script src="js/app.js"></script>
+</body>
 </html>
