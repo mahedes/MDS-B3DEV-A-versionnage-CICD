@@ -29,7 +29,7 @@
 
                 <div class="categories">
                     <h3>Categories</h3>
-                    <ul>
+                    <ul id="categories-list"></ul>
                         <li class="active"><a href="#" data-category="all">All Tasks</a></li>
                         <li><a href="#" data-category="completed">Completed</a></li>
                         <li><a href="#" data-category="work">Work</a></li>
@@ -54,6 +54,16 @@
             <!-- Zone des tâches -->
             <div class="tasks-area">
                 <!-- Input global pour ajouter une tâche (visible pour toutes les catégories) -->
+           <!-- Zone des tâches -->
+            <!-- ⭐ MODIFIÉ : Ajout de l'id="tasks-area" -->
+            <div class="tasks-area" id="tasks-area">
+                <!-- Exemple de catégorie de tâches -->
+                <div class="task-category active" id="category-all">
+                    <div class="category-header">
+                        <h2>All Tasks</h2>
+                        <span class="task-count" id="all-tasks-count">0</span>
+                    </div>
+
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task..." aria-label="Add a new task">
                         <button class="add-task-btn">Add</button>
@@ -86,6 +96,11 @@
                         <h2>Work</h2>
                         <span class="task-count" id="work-tasks-count">0</span>
                     </div>
+                    <!-- ⭐ AJOUTÉ : Input pour ajouter des tâches dans cette catégorie -->
+                    <div class="task-input-container">
+                        <input type="text" class="task-input" placeholder="Add a new task...">
+                        <button class="add-task-btn">Add</button>
+                    </div>
                     <ul class="tasks-list" id="work-tasks-list"></ul>
                     <ul class="tasks-list" id="work-tasks-list" role="list"></ul>
                 </div>
@@ -96,6 +111,12 @@
                         <span class="task-count" id="personal-tasks-count">0</span>
                     </div>
                     <ul class="tasks-list" id="personal-tasks-list" role="list"></ul>
+                    <!-- ⭐ AJOUTÉ : Input pour ajouter des tâches dans cette catégorie -->
+                    <div class="task-input-container">
+                        <input type="text" class="task-input" placeholder="Add a new task...">
+                        <button class="add-task-btn">Add</button>
+                    </div>
+                    <ul class="tasks-list" id="personal-tasks-list"></ul>
                 </div>
 
                 <div class="task-category" id="category-shopping">
@@ -104,6 +125,12 @@
                         <span class="task-count" id="shopping-tasks-count">0</span>
                     </div>
                     <ul class="tasks-list" id="shopping-tasks-list" role="list"></ul>
+                    <!-- ⭐ AJOUTÉ : Input pour ajouter des tâches dans cette catégorie -->
+                    <div class="task-input-container">
+                        <input type="text" class="task-input" placeholder="Add a new task...">
+                        <button class="add-task-btn">Add</button>
+                    </div>
+                    <ul class="tasks-list" id="shopping-tasks-list"></ul>
                 </div>
             </div>
         </div>
@@ -118,6 +145,23 @@
         </footer>
     </div>
 
+      <!-- Modal pour nouvelle catégorie -->
+<div class="modal-overlay" id="new-category-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Create New Category</h3>
+            <button class="modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="new-category-name" class="modal-input" placeholder="Category name..." maxlength="20">
+            <p class="modal-hint">Choose a name for your new category (max 20 characters)</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary modal-cancel">Cancel</button>
+            <button class="btn-primary modal-create">Create</button>
+        </div>
+    </div>
+</div>
     <!-- Intégration du JavaScript -->
     <script src="js/app.js"></script>
 </body>
