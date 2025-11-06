@@ -31,6 +31,7 @@
                     <h3>Categories</h3>
                     <ul id="categories-list"></ul>
                         <li class="active"><a href="#" data-category="all">All Tasks</a></li>
+                        <li><a href="#" data-category="completed">Completed</a></li>
                         <li><a href="#" data-category="work">Work</a></li>
                         <li><a href="#" data-category="personal">Personal</a></li>
                         <li><a href="#" data-category="shopping">Shopping</a></li>
@@ -50,6 +51,9 @@
                 </div>
             </aside>
 
+            <!-- Zone des tâches -->
+            <div class="tasks-area">
+                <!-- Input global pour ajouter une tâche (visible pour toutes les catégories) -->
            <!-- Zone des tâches -->
             <!-- ⭐ MODIFIÉ : Ajout de l'id="tasks-area" -->
             <div class="tasks-area" id="tasks-area">
@@ -65,11 +69,26 @@
                         <button class="add-task-btn">Add</button>
                     </div>
 
-                    <ul class="tasks-list" id="all-tasks-list">
-                        <!-- Les tâches seront ajoutées ici dynamiquement -->
-                        <li class="empty-state">No tasks yet. Add one above!</li>
-                    </ul>
-                </div>
+                    <!-- Exemple de catégorie de tâches -->
+                    <div class="task-category active" id="category-all">
+                        <div class="category-header">
+                            <h2>All Tasks</h2>
+                            <span class="task-count" id="all-tasks-count">0</span>
+                        </div>
+
+                        <ul class="tasks-list" id="all-tasks-list">
+                            <!-- Les tâches seront ajoutées ici dynamiquement -->
+                            <li class="empty-state">No tasks yet. Add one above!</li>
+                        </ul>
+                    </div>
+
+                    <div class="task-category" id="category-completed">
+                        <div class="category-header">
+                            <h2>Completed</h2>
+                            <span class="task-count" id="completed-tasks-count">0</span>
+                        </div>
+                        <ul class="tasks-list" id="completed-tasks-list"></ul>
+                    </div>
 
                 <!-- Autres catégories (cachées par défaut) -->
                 <div class="task-category" id="category-work">
@@ -83,6 +102,7 @@
                         <button class="add-task-btn">Add</button>
                     </div>
                     <ul class="tasks-list" id="work-tasks-list"></ul>
+                    <ul class="tasks-list" id="work-tasks-list" role="list"></ul>
                 </div>
 
                 <div class="task-category" id="category-personal">
@@ -90,6 +110,7 @@
                         <h2>Personal</h2>
                         <span class="task-count" id="personal-tasks-count">0</span>
                     </div>
+                    <ul class="tasks-list" id="personal-tasks-list" role="list"></ul>
                     <!-- ⭐ AJOUTÉ : Input pour ajouter des tâches dans cette catégorie -->
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task...">
@@ -103,6 +124,7 @@
                         <h2>Shopping</h2>
                         <span class="task-count" id="shopping-tasks-count">0</span>
                     </div>
+                    <ul class="tasks-list" id="shopping-tasks-list" role="list"></ul>
                     <!-- ⭐ AJOUTÉ : Input pour ajouter des tâches dans cette catégorie -->
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task...">

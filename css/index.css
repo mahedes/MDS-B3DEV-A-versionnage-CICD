@@ -292,6 +292,11 @@ body {
 	min-height: 200px;
 }
 
+.tasks-list.drag-over {
+	outline: 3px dashed rgba(102,126,234,0.7);
+	border-radius: 8px;
+}
+
 .empty-state {
 	text-align: center;
 	color: #a0aec0;
