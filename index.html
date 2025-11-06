@@ -52,23 +52,24 @@
 
             <!-- Zone des tâches -->
             <div class="tasks-area">
-                <!-- Exemple de catégorie de tâches -->
-                <div class="task-category active" id="category-all">
-                    <div class="category-header">
-                        <h2>All Tasks</h2>
-                        <span class="task-count" id="all-tasks-count">0</span>
-                    </div>
-
+                <!-- Input global pour ajouter une tâche (visible pour toutes les catégories) -->
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task..." aria-label="Add a new task">
                         <button class="add-task-btn">Add</button>
                     </div>
 
-                    <ul class="tasks-list" id="all-tasks-list">
-                        <!-- Les tâches seront ajoutées ici dynamiquement -->
-                        <li class="empty-state">No tasks yet. Add one above!</li>
-                    </ul>
-                </div>
+                    <!-- Exemple de catégorie de tâches -->
+                    <div class="task-category active" id="category-all">
+                        <div class="category-header">
+                            <h2>All Tasks</h2>
+                            <span class="task-count" id="all-tasks-count">0</span>
+                        </div>
+
+                        <ul class="tasks-list" id="all-tasks-list">
+                            <!-- Les tâches seront ajoutées ici dynamiquement -->
+                            <li class="empty-state">No tasks yet. Add one above!</li>
+                        </ul>
+                    </div>
 
                 <!-- Autres catégories (cachées par défaut) -->
                 <div class="task-category" id="category-work">
