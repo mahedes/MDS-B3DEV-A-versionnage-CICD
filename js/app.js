@@ -10,6 +10,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const statTotalTasks = document.getElementById('total-tasks');
     const statCompletedTasks = document.getElementById('completed-tasks');
 
+    // Textes de traduction
+    const translations = {
+        en: {
+            title: "TodoList Pro",
+            inputPlaceholder: "Add a new task...",
+            addButton: "Add",
+            all: "All Tasks",
+            work: "Work",
+            personal: "Personal",
+            shopping: "Shopping",
+            totalTasks: "Total Tasks",
+            completedTasks: "Completed Tasks",
+            emptyState: "No tasks yet. Add one above!",
+            edit: "Edit",
+            delete: "Delete",
+            editPrompt: "Edit task:",
+            categories: "Categories",
+            stats: "Stats",
+            newList: "+ New List",
+            copyright: "© 2025 TodoList Pro. All rights reserved.",
+            about: "About",
+            help: "Help",
+            slogan: "Organize your tasks efficiently"
+        },
+        fr: {
+            title: "Liste de Tâches Pro",
+            inputPlaceholder: "Ajouter une nouvelle tâche...",
+            addButton: "Ajouter",
+            all: "Toutes les Tâches",
+            work: "Travail",
+            personal: "Personnel",
+            shopping: "Courses",
+            totalTasks: "Tâches Totales",
+            completedTasks: "Tâches Terminées",
+            emptyState: "Aucune tâche pour le moment. Ajoutez-en une !",
+            edit: "Modifier",
+            delete: "Supprimer",
+            editPrompt: "Modifier la tâche :",
+            categories: "Catégories",
+            stats: "Statistiques",
+            newList: "+ Nouvelle Liste",
+            copyright: "© 2025 Liste de Tâches Pro. Tous droits réservés.",
+            about: "À propos",
+            help: "Aide",
+            slogan: "Organisez vos tâches efficacement"
+        }
+    };
+
+    // Langue par défaut
+    let currentLang = 'en';
+
     // État initial de l'application
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {
         all: [],
@@ -30,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStats();
         updateTaskCounts();
         setupEventListeners();
+        updateLanguage(); // Appliquer la langue au chargement
     }
 
     // Configuration des écouteurs d'événements
@@ -83,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeTaskList.innerHTML = '';
 
         if (tasks[activeCategory].length === 0) {
-            activeTaskList.innerHTML = '<div class="empty-state">No tasks yet. Add one above!</div>';
+            activeTaskList.innerHTML = `<div class="empty-state">${translations[currentLang].emptyState}</div>`;
             return;
         }
 
@@ -94,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
                 <span class="task-text">${task.text}</span>
                 <div class="task-actions">
-                    <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
-                    <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
+                    <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="${translations[currentLang].edit}">${translations[currentLang].edit}</button>
+                    <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="${translations[currentLang].delete}">${translations[currentLang].delete}</button>
                 </div>
             `;
             activeTaskList.appendChild(taskItem);
@@ -149,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskTextElement = taskItem.querySelector('.task-text');
         const currentText = taskTextElement.textContent;
 
-        const newText = prompt('Edit task:', currentText);
+        const newText = prompt(translations[currentLang].editPrompt, currentText);
         if (newText !== null && newText.trim() !== '') {
             taskTextElement.textContent = newText.trim();
 
@@ -188,6 +240,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Changer de langue
     function changeLanguage(lang) {
+        currentLang = lang;
+        
+        // Mettre à jour les boutons de langue
         langButtons.forEach(button => {
             button.classList.remove('active');
             if (button.dataset.lang === lang) {
@@ -195,8 +250,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Ici, vous pourriez ajouter une logique pour changer les textes de l'interface
-        // en fonction de la langue sélectionnée.
+        // Mettre à jour tous les textes de l'interface
+        updateLanguage();
+        
+        // Re-rendre les tâches pour mettre à jour les boutons Edit/Delete
+        renderTasks();
+    }
+
+    // Mettre à jour tous les textes de l'interface
+    function updateLanguage() {
+        const t = translations[currentLang];
+        
+        // Mettre à jour le titre
+        document.querySelector('h1').textContent = t.title;
+        
+        // Mettre à jour le slogan
+        document.querySelector('.app-header p').textContent = t.slogan;
+        
+        // Mettre à jour le placeholder de l'input
+        taskInput.placeholder = t.inputPlaceholder;
+        
+        // Mettre à jour le bouton d'ajout
+        addTaskBtn.textContent = t.addButton;
+        
+        // Mettre à jour le bouton New List
+        document.querySelector('.new-list-btn').textContent = t.newList;
+        
+        // Mettre à jour les titres des sections
+        document.querySelector('.categories h3').textContent = t.categories;
+        document.querySelector('.stats h3').textContent = t.stats;
+        
+        // Mettre à jour les catégories
+        document.querySelector('[data-category="all"]').textContent = t.all;
+        document.querySelector('[data-category="work"]').textContent = t.work;
+        document.querySelector('[data-category="personal"]').textContent = t.personal;
+        document.querySelector('[data-category="shopping"]').textContent = t.shopping;
+        
+        // Mettre à jour les titres des catégories dans la zone des tâches
+        document.querySelector('#category-all h2').textContent = t.all;
+        document.querySelector('#category-work h2').textContent = t.work;
+        document.querySelector('#category-personal h2').textContent = t.personal;
+        document.querySelector('#category-shopping h2').textContent = t.shopping;
+        
+        // Mettre à jour les statistiques - CORRECTION ICI
+        const statItems = document.querySelectorAll('.stat-item');
+        statItems[0].querySelector('.stat-label').textContent = t.totalTasks;
+        statItems[1].querySelector('.stat-label').textContent = t.completedTasks;
+        
+        // Mettre à jour le footer
+        document.querySelector('.app-footer p').textContent = t.copyright;
+        document.querySelectorAll('.btn-secondary')[0].textContent = t.about;
+        document.querySelectorAll('.btn-secondary')[1].textContent = t.help;
     }
 
     // Mettre à jour les statistiques
