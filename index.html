@@ -31,6 +31,7 @@
                     <h3>Categories</h3>
                     <ul>
                         <li class="active"><a href="#" data-category="all">All Tasks</a></li>
+                        <li><a href="#" data-category="completed">Completed</a></li>
                         <li><a href="#" data-category="work">Work</a></li>
                         <li><a href="#" data-category="personal">Personal</a></li>
                         <li><a href="#" data-category="shopping">Shopping</a></li>
@@ -69,6 +70,14 @@
                             <!-- Les tâches seront ajoutées ici dynamiquement -->
                             <li class="empty-state">No tasks yet. Add one above!</li>
                         </ul>
+                    </div>
+
+                    <div class="task-category" id="category-completed">
+                        <div class="category-header">
+                            <h2>Completed</h2>
+                            <span class="task-count" id="completed-tasks-count">0</span>
+                        </div>
+                        <ul class="tasks-list" id="completed-tasks-list"></ul>
                     </div>
 
                 <!-- Autres catégories (cachées par défaut) -->
