@@ -8,6 +8,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const statTotalTasks = document.getElementById('total-tasks');
     const statCompletedTasks = document.getElementById('completed-tasks');
 
+    // Traductions par défaut
+    const translations = {
+        en: {
+            edit: 'Edit',
+            delete: 'Delete',
+            editPrompt: 'Edit task:',
+            emptyState: 'No tasks yet. Add one above!'
+        },
+        fr: {
+            edit: 'Modifier',
+            delete: 'Supprimer',
+            editPrompt: 'Modifier la tâche :',
+            emptyState: 'Aucune tâche pour le moment. Ajoutez-en une !'
+        }
+    };
+
+    let currentLang = 'en'; // Langue par défaut
+
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {
         all: [],
         work: [],
@@ -24,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStats();
         updateTaskCounts();
         setupEventListeners();
+        updateLanguage(); // Appliquer la langue au chargement
     }
 
     function setupEventListeners() {
@@ -39,8 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-
-
         langButtons.forEach(button => {
             button.addEventListener('click', () => {
                 changeLanguage(button.dataset.lang);
@@ -54,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        document.querySelectorAll('.tasks-list').forEach(list => {
+        taskLists.forEach(list => {
             list.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 list.classList.add('drag-over');
@@ -97,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTasks() {
         const activeTaskList = document.getElementById(`${activeCategory}-tasks-list`);
+        if (!activeTaskList) return;
         activeTaskList.innerHTML = '';
 
         const tasksToRender = activeCategory === 'completed'
@@ -104,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             : (Array.isArray(tasks[activeCategory]) ? tasks[activeCategory] : []);
 
         if (tasksToRender.length === 0) {
-            activeTaskList.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
+            activeTaskList.innerHTML = `<div class="empty-state">${translations[currentLang]?.emptyState || 'No tasks yet!'}</div>`;
             return;
         }
 
@@ -128,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
                 <span class="task-text">${task.text}</span>
                 <div class="task-actions">
-                    <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
-                    <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
+                    <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="${translations[currentLang].edit}">${translations[currentLang].edit}</button>
+                    <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="${translations[currentLang].delete}">${translations[currentLang].delete}</button>
                 </div>
             `;
 
@@ -170,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveTasks();
         updateStats();
-       
         renderTasks();
     }
 
@@ -217,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveTasks();
         updateStats();
         updateTaskCounts();
-
         renderTasks();
     }
 
@@ -235,14 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTaskCounts();
     }
 
-    // Modifier une tâche
     function editTask(e) {
         const taskId = parseInt(e.target.dataset.id);
         const taskItem = e.target.closest('.task-item');
         const taskTextElement = taskItem.querySelector('.task-text');
         const currentText = taskTextElement.textContent;
 
-        const newText = prompt('Edit task:', currentText);
+        const newText = prompt(translations[currentLang].editPrompt, currentText);
         if (newText !== null && newText.trim() !== '') {
             taskTextElement.textContent = newText.trim();
             const allIdx = tasks.all.findIndex(t => t.id === taskId);
@@ -279,24 +294,30 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks();
     }
 
-    // Changer de langue
     function changeLanguage(lang) {
+        currentLang = lang;
+
         langButtons.forEach(button => {
             button.classList.remove('active');
-            if (button.dataset.lang === lang) {
-                button.classList.add('active');
-            }
+            if (button.dataset.lang === lang) button.classList.add('active');
         });
 
-  
+        updateLanguage();
+        renderTasks();
+    }
+
+    function updateLanguage() {
+        // Ici tu peux mettre à jour les labels, placeholders ou boutons selon la langue
+        taskInput.placeholder = currentLang === 'fr' ? 'Nouvelle tâche...' : 'New task...';
+        addTaskBtn.textContent = currentLang === 'fr' ? 'Ajouter' : 'Add';
     }
 
     function updateStats() {
         const totalTasks = tasks.all.length;
         const completedTasks = tasks.all.filter(task => task.completed).length;
 
-        statTotalTasks.textContent = totalTasks;
-        statCompletedTasks.textContent = completedTasks;
+        if (statTotalTasks) statTotalTasks.textContent = totalTasks;
+        if (statCompletedTasks) statCompletedTasks.textContent = completedTasks;
     }
 
     function updateTaskCounts() {
