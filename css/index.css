@@ -1,3 +1,31 @@
+.task-date {
+	font-size: 12px;
+	color: #888;
+	margin-left: 12px;
+	font-style: italic;
+	vertical-align: middle;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font-size: 100%;
+	vertical-align: baseline;
+	font-family: inherit;
+	font-weight: inherit;
+	color: inherit;
+	-webkit-appearance: none;
+	appearance: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-font-smoothing: antialiased;
+}
 /* Reset and Base Styles */
 * {
 	margin: 0;
