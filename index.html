@@ -30,6 +30,22 @@
         .task-item.low-priority { border-left: 4px solid #4CAF50; }
         .task-item.medium-priority { border-left: 4px solid #FFC107; }
         .task-item.high-priority { border-left: 4px solid #F44336; }
+
+        /* Style pour le bouton "Mark All as Done" */
+        .mark-all-done-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+
+        .mark-all-done-btn:hover {
+            background-color: #45a049;
+        }
     </style>
     <link rel="stylesheet" href="css/index.css">
 </head>
@@ -55,7 +71,6 @@
                     <h3>Categories</h3>
                     <ul id="categories-list">
                         <li class="active"><a href="#" data-category="all">All Tasks</a></li>
-                        <li><a href="#" data-category="completed">Completed</a></li>
                         <li><a href="#" data-category="work">Work</a></li>
                         <li><a href="#" data-category="personal">Personal</a></li>
                         <li><a href="#" data-category="shopping">Shopping</a></li>
@@ -74,9 +89,6 @@
                 </div>
             </aside>
 
-            <!-- Zone des tâches -->
-            <div class="tasks-area">
-                <!-- Input global pour ajouter une tâche (visible pour toutes les catégories) -->
            <!-- Zone des tâches -->
             <div class="tasks-area" id="tasks-area">
                 <!-- Exemple de catégorie de tâches -->
@@ -84,6 +96,8 @@
                     <div class="category-header">
                         <h2>All Tasks</h2>
                         <span class="task-count" id="all-tasks-count">0</span>
+                        <!-- ⭐ NOUVEAU : Bouton pour marquer toutes les tâches comme complétées -->
+                        <button class="mark-all-done-btn">Mark All as Done</button>
                     </div>
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task..." aria-label="Add a new task">
@@ -99,6 +113,7 @@
                     <div class="category-header">
                         <h2>Work</h2>
                         <span class="task-count" id="work-tasks-count">0</span>
+                        <button class="mark-all-done-btn">Mark All as Done</button>
                     </div>
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task...">
@@ -106,12 +121,12 @@
                         <button class="priority-btn" data-priority="low">🟢</button>
                     </div>
                     <ul class="tasks-list" id="work-tasks-list"></ul>
-                    <ul class="tasks-list" id="work-tasks-list" role="list"></ul>
                 </div>
                 <div class="task-category" id="category-personal">
                     <div class="category-header">
                         <h2>Personal</h2>
                         <span class="task-count" id="personal-tasks-count">0</span>
+                        <button class="mark-all-done-btn">Mark All as Done</button>
                     </div>
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task...">
@@ -124,6 +139,7 @@
                     <div class="category-header">
                         <h2>Shopping</h2>
                         <span class="task-count" id="shopping-tasks-count">0</span>
+                        <button class="mark-all-done-btn">Mark All as Done</button>
                     </div>
                     <div class="task-input-container">
                         <input type="text" class="task-input" placeholder="Add a new task...">
