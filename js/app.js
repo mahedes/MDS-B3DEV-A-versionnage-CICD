@@ -119,8 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
             completed: false
         };
 
-        tasks[activeCategory].push(newTask);
-        tasks.all.push(newTask);
+        if (activeCategory === 'all') {
+            tasks.all.push(newTask);
+        } else {
+            tasks[activeCategory].push(newTask);
+            tasks.all.push(newTask);
+        }
 
         saveTasks();
         renderTasks();
