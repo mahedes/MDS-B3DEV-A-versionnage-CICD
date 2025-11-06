@@ -1,6 +1,4 @@
-// Attendre que le DOM soit chargé
 document.addEventListener('DOMContentLoaded', () => {
-    // Sélection des éléments du DOM
     const taskInput = document.querySelector('.task-input');
     const addTaskBtn = document.querySelector('.add-task-btn');
     const taskLists = document.querySelectorAll('.tasks-list');
@@ -9,6 +7,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskCounts = document.querySelectorAll('.task-count');
     const statTotalTasks = document.getElementById('total-tasks');
     const statCompletedTasks = document.getElementById('completed-tasks');
+    const newListBtn = document.querySelector('.new-list-btn');
+    const modal = document.getElementById('new-category-modal');
+    const modalClose = document.querySelector('.modal-close');
+    const modalCancel = document.querySelector('.modal-cancel');
+    const modalCreate = document.querySelector('.modal-create');
+    const newCategoryInput = document.getElementById('new-category-name');
+
+    const translations = {
+        en: {
+            edit: 'Edit',
+            delete: 'Delete',
+            editPrompt: 'Edit task:',
+            emptyState: 'No tasks yet. Add one above!'
+        },
+        fr: {
+            edit: 'Modifier',
+            delete: 'Supprimer',
+            editPrompt: 'Modifier la tâche :',
+            emptyState: 'Aucune tâche pour le moment. Ajoutez-en une !'
+        }
+    };
 
     // Textes de traduction
     const translations = {
@@ -68,14 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
         personal: [],
         shopping: []
     };
-
-    // Catégorie active par défaut
     let activeCategory = 'all';
 
-    // Initialisation
     init();
 
-    // Fonction d'initialisation
     function init() {
         renderTasks();
         updateStats();
@@ -84,47 +99,60 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLanguage(); // Appliquer la langue au chargement
     }
 
-    // Configuration des écouteurs d'événements
     function setupEventListeners() {
-        // Ajouter une tâche
         addTaskBtn.addEventListener('click', addTask);
-        taskInput.addEventListener('keypress', (e) => {
+        taskInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') addTask();
         });
 
-        // Changer de catégorie
+        // Modal
+        newListBtn.addEventListener('click', openModal);
+        modalClose.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modalCreate.addEventListener('click', createNewCategory);
+        newCategoryInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') createNewCategory();
+        });
+
+        // Catégories
         categoryButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
+            button.addEventListener('click', e => {
                 e.preventDefault();
                 changeCategory(button.dataset.category);
             });
         });
 
-        // Changer de langue
         langButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                changeLanguage(button.dataset.lang);
+            button.addEventListener('click', () => changeLanguage(button.dataset.lang));
+        });
+
+        if (statCompletedTasks) {
+            statCompletedTasks.addEventListener('click', e => {
+                e.preventDefault();
+                changeCategory('completed');
             });
+        }
+
+        taskLists.forEach(list => {
+            list.addEventListener('dragover', e => {
+                e.preventDefault();
+                list.classList.add('drag-over');
+            });
+            list.addEventListener('dragleave', () => list.classList.remove('drag-over'));
+            list.addEventListener('drop', handleDrop);
         });
     }
 
-    // Ajouter une tâche
     function addTask() {
         const taskText = taskInput.value.trim();
         if (!taskText) return;
 
-        const newTask = {
-            id: Date.now(),
-            text: taskText,
-            completed: false
-        };
+        const newTask = { id: Date.now(), text: taskText, completed: false };
+        const targetCategory = activeCategory === 'completed' ? 'all' : activeCategory;
 
-        if (activeCategory === 'all') {
-            tasks.all.push(newTask);
-        } else {
-            tasks[activeCategory].push(newTask);
-            tasks.all.push(newTask);
-        }
+        if (!Array.isArray(tasks[targetCategory])) tasks[targetCategory] = [];
+        tasks[targetCategory].push(newTask);
+        if (!tasks.all.some(t => t.id === newTask.id)) tasks.all.push(newTask);
 
         saveTasks();
         renderTasks();
@@ -133,9 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
         taskInput.value = '';
     }
 
-    // Rendre les tâches
     function renderTasks() {
         const activeTaskList = document.getElementById(`${activeCategory}-tasks-list`);
+        if (!activeTaskList) return;
         activeTaskList.innerHTML = '';
 
         if (tasks[activeCategory].length === 0) {
@@ -143,9 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        tasks[activeCategory].forEach(task => {
+        tasksToRender.forEach(task => {
             const taskItem = document.createElement('li');
             taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
+            taskItem.draggable = true;
+            taskItem.dataset.id = task.id;
+
             taskItem.innerHTML = `
                 <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
                 <span class="task-text">${task.text}</span>
@@ -154,51 +185,82 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="${translations[currentLang].delete}">${translations[currentLang].delete}</button>
                 </div>
             `;
+
+            taskItem.addEventListener('dragstart', ev => {
+                ev.dataTransfer.setData('text/plain', JSON.stringify({ id: task.id, from: activeCategory }));
+                ev.dataTransfer.effectAllowed = 'move';
+            });
+
             activeTaskList.appendChild(taskItem);
         });
 
-        // Ajouter les écouteurs pour les boutons des tâches
         document.querySelectorAll('.task-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', toggleTaskCompletion);
         });
-
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', deleteTask);
-        });
-
-        document.querySelectorAll('.btn-edit').forEach(button => {
-            button.addEventListener('click', editTask);
-        });
+        document.querySelectorAll('.btn-delete').forEach(btn => btn.addEventListener('click', deleteTask));
+        document.querySelectorAll('.btn-edit').forEach(btn => btn.addEventListener('click', editTask));
     }
 
-    // Basculer l'état de complétion d'une tâche
     function toggleTaskCompletion(e) {
-        const taskId = parseInt(e.target.dataset.id);
-        const taskIndex = tasks[activeCategory].findIndex(task => task.id === taskId);
-        tasks[activeCategory][taskIndex].completed = e.target.checked;
+        const taskId = parseInt(e.target.dataset.id, 10);
+        const checked = e.target.checked;
 
-        // Mettre à jour dans "all"
-        const allTaskIndex = tasks.all.findIndex(task => task.id === taskId);
-        tasks.all[allTaskIndex].completed = e.target.checked;
+        const allTask = tasks.all.find(t => t.id === taskId);
+        if (allTask) allTask.completed = checked;
+
+        Object.keys(tasks).forEach(cat => {
+            if (Array.isArray(tasks[cat])) {
+                const t = tasks[cat].find(x => x.id === taskId);
+                if (t) t.completed = checked;
+            }
+        });
 
         saveTasks();
         updateStats();
+        renderTasks();
     }
 
-    // Supprimer une tâche
+    function handleDrop(e) {
+        e.preventDefault();
+        const list = e.currentTarget;
+        list.classList.remove('drag-over');
+
+        let data;
+        try {
+            data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        } catch {
+            return;
+        }
+
+        const taskId = parseInt(data.id, 10);
+        const fromCategory = data.from;
+        const toCategory = list.id.replace('-tasks-list', '');
+
+        if (!taskId || fromCategory === toCategory) return;
+        const taskObj = tasks[fromCategory].find(t => t.id === taskId);
+        if (!taskObj) return;
+
+        tasks[fromCategory] = tasks[fromCategory].filter(t => t.id !== taskId);
+        if (!Array.isArray(tasks[toCategory])) tasks[toCategory] = [];
+        tasks[toCategory].push(taskObj);
+
+        saveTasks();
+        updateStats();
+        updateTaskCounts();
+        renderTasks();
+    }
+
     function deleteTask(e) {
-        const taskId = parseInt(e.target.dataset.id);
-
-        tasks[activeCategory] = tasks[activeCategory].filter(task => task.id !== taskId);
-        tasks.all = tasks.all.filter(task => task.id !== taskId);
-
+        const taskId = parseInt(e.target.dataset.id, 10);
+        Object.keys(tasks).forEach(cat => {
+            if (Array.isArray(tasks[cat])) tasks[cat] = tasks[cat].filter(t => t.id !== taskId);
+        });
         saveTasks();
         renderTasks();
         updateStats();
         updateTaskCounts();
     }
 
-    // Modifier une tâche
     function editTask(e) {
         const taskId = parseInt(e.target.dataset.id);
         const taskItem = e.target.closest('.task-item');
@@ -217,32 +279,24 @@ document.addEventListener('DOMContentLoaded', () => {
             tasks.all[allTaskIndex].text = newText.trim();
 
             saveTasks();
+            renderTasks();
         }
     }
 
-    // Changer de catégorie
     function changeCategory(category) {
-        // Masquer toutes les catégories
-        document.querySelectorAll('.task-category').forEach(cat => {
-            cat.classList.remove('active');
-        });
-
-        // Afficher la catégorie sélectionnée
-        document.getElementById(`category-${category}`).classList.add('active');
+        document.querySelectorAll('.task-category').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById(`category-${category}`);
+        if (target) target.classList.add('active');
         activeCategory = category;
 
-        // Mettre à jour les boutons de catégorie
-        categoryButtons.forEach(button => {
-            button.closest('li').classList.remove('active');
-            if (button.dataset.category === category) {
-                button.closest('li').classList.add('active');
-            }
+        categoryButtons.forEach(btn => {
+            btn.closest('li').classList.remove('active');
+            if (btn.dataset.category === category) btn.closest('li').classList.add('active');
         });
 
         renderTasks();
     }
 
-    // Changer de langue
     function changeLanguage(lang) {
         currentLang = lang;
         
@@ -253,6 +307,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.classList.add('active');
             }
         });
+        updateLanguage();
+        renderTasks();
+    }
 
         // Mettre à jour tous les textes de l'interface
         updateLanguage();
@@ -307,24 +364,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.btn-secondary')[1].textContent = t.help;
     }
 
-    // Mettre à jour les statistiques
     function updateStats() {
-        const totalTasks = tasks.all.length;
-        const completedTasks = tasks.all.filter(task => task.completed).length;
-
-        statTotalTasks.textContent = totalTasks;
-        statCompletedTasks.textContent = completedTasks;
+        const total = tasks.all.length;
+        const completed = tasks.all.filter(t => t.completed).length;
+        if (statTotalTasks) statTotalTasks.textContent = total;
+        if (statCompletedTasks) statCompletedTasks.textContent = completed;
     }
 
-    // Mettre à jour le compteur de tâches par catégorie
     function updateTaskCounts() {
         taskCounts.forEach(count => {
-            const category = count.id.replace('-tasks-count', '');
-            count.textContent = tasks[category].length;
+            const cat = count.id.replace('-tasks-count', '');
+            count.textContent =
+                cat === 'completed'
+                    ? tasks.all.filter(t => t.completed).length
+                    : (Array.isArray(tasks[cat]) ? tasks[cat].length : 0);
         });
     }
 
-    // Sauvegarder les tâches dans localStorage
     function saveTasks() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
