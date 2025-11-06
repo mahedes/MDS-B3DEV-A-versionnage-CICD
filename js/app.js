@@ -88,6 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
         shopping: []
     };
     let activeCategory = 'all';
+    // Priorité active par défaut
+    let activePriority = 'low';
 
     init();
 
@@ -103,6 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
         addTaskBtn.addEventListener('click', addTask);
         taskInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') addTask();
+        });
+
+        // Écouteur pour le bouton de priorité
+        document.querySelectorAll('.priority-btn').forEach(button => {
+            button.addEventListener('click', togglePriority);
         });
 
         // Modal
@@ -143,22 +150,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Fonction pour changer la priorité
+    function togglePriority(e) {
+        const button = e.target;
+        const priorities = ['low', 'medium', 'high'];
+        const currentIndex = priorities.indexOf(activePriority);
+        const nextIndex = (currentIndex + 1) % priorities.length;
+        activePriority = priorities[nextIndex];
+        button.dataset.priority = activePriority;
+        button.textContent = getPriorityEmoji(activePriority);
+    }
+
+    // Fonction pour obtenir l'emoji de priorité
+    function getPriorityEmoji(priority) {
+        const emojis = {
+            'low': '🟢',
+            'medium': '🟡',
+            'high': '🔴'
+        };
+        return emojis[priority];
+    }
+
+    // Ajouter une tâche
     function addTask() {
-        const taskText = taskInput.value.trim();
+        const taskText = document.querySelector(`.task-category.active .task-input`).value.trim();
         if (!taskText) return;
 
-        const newTask = { id: Date.now(), text: taskText, completed: false };
-        const targetCategory = activeCategory === 'completed' ? 'all' : activeCategory;
+        const newTask = {
+            id: Date.now(),
+            text: taskText,
+            completed: false,
+            priority: activePriority
+        };
 
-        if (!Array.isArray(tasks[targetCategory])) tasks[targetCategory] = [];
-        tasks[targetCategory].push(newTask);
-        if (!tasks.all.some(t => t.id === newTask.id)) tasks.all.push(newTask);
+        if (activeCategory === 'all') {
+            tasks.all.push(newTask);
+        } else {
+            tasks[activeCategory].push(newTask);
+            tasks.all.push(newTask);
+        }
 
         saveTasks();
         renderTasks();
         updateStats();
         updateTaskCounts();
-        taskInput.value = '';
+        document.querySelector(`.task-category.active .task-input`).value = '';
     }
 
     function renderTasks() {
@@ -173,13 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tasksToRender.forEach(task => {
             const taskItem = document.createElement('li');
-            taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
-            taskItem.draggable = true;
-            taskItem.dataset.id = task.id;
-
+            taskItem.className = `task-item ${task.completed ? 'completed' : ''} ${task.priority}-priority`;
             taskItem.innerHTML = `
                 <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
                 <span class="task-text">${task.text}</span>
+                <span class="task-priority-indicator">${getPriorityEmoji(task.priority)}</span>
                 <div class="task-actions">
                     <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="${translations[currentLang].edit}">${translations[currentLang].edit}</button>
                     <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="${translations[currentLang].delete}">${translations[currentLang].delete}</button>
@@ -267,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskTextElement = taskItem.querySelector('.task-text');
         const currentText = taskTextElement.textContent;
 
-        const newText = prompt(translations[currentLang].editPrompt, currentText);
+        const newText = prompt('Edit task:', currentText);
         if (newText !== null && newText.trim() !== '') {
             taskTextElement.textContent = newText.trim();
 
@@ -383,5 +417,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveTasks() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Ouvrir la modal
+    function openModal() {
+        modal.classList.add('active');
+        newCategoryInput.focus();
+    }
+
+    // Fermer la modal
+    function closeModal() {
+        modal.classList.remove('active');
+        newCategoryInput.value = '';
+    }
+
+    // Créer une nouvelle catégorie
+    function createNewCategory() {
+        const categoryName = newCategoryInput.value.trim().toLowerCase();
+
+        if (!categoryName) {
+            alert('Please enter a category name');
+            return;
+        }
+
+        // Vérifier si la catégorie existe déjà
+        if (tasks[categoryName]) {
+            alert('This category already exists');
+            return;
+        }
+
+        // Créer la nouvelle catégorie
+        tasks[categoryName] = [];
+
+        // Ajouter le bouton dans la sidebar
+        const categoriesUl = document.querySelector('.categories ul');
+        const newLi = document.createElement('li');
+        newLi.innerHTML = `<a href="#" data-category="${categoryName}">${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}</a>`;
+        categoriesUl.appendChild(newLi);
+
+        // Créer la section de tâches pour cette catégorie
+        const tasksArea = document.querySelector('.tasks-area');
+        const newCategoryDiv = document.createElement('div');
+        newCategoryDiv.className = 'task-category';
+        newCategoryDiv.id = `category-${categoryName}`;
+        newCategoryDiv.innerHTML = `
+            <div class="category-header">
+                <h2>${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}</h2>
+                <span class="task-count" id="${categoryName}-tasks-count">0</span>
+            </div>
+            <div class="task-input-container">
+                <input type="text" class="task-input" placeholder="Add a new task...">
+                <button class="add-task-btn">Add</button>
+                <button class="priority-btn" data-priority="low">🟢</button>
+            </div>
+            <ul class="tasks-list" id="${categoryName}-tasks-list"></ul>
+        `;
+        tasksArea.appendChild(newCategoryDiv);
+
+        // Ajouter l'écouteur d'événement au nouveau bouton
+        const newButton = newLi.querySelector('a');
+        newButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            changeCategory(categoryName);
+        });
+
+        // Ajouter l'écouteur pour le bouton de priorité de la nouvelle catégorie
+        const newPriorityBtn = newCategoryDiv.querySelector('.priority-btn');
+        newPriorityBtn.addEventListener('click', togglePriority);
+
+        // Sauvegarder et fermer
+        saveTasks();
+        updateTaskCounts();
+        closeModal();
+
+        // Optionnel : basculer vers la nouvelle catégorie
+        changeCategory(categoryName);
     }
 });
