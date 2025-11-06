@@ -106,6 +106,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 changeLanguage(button.dataset.lang);
             });
         });
+
+        // Drag & Drop: enable drop targets on each tasks list
+        document.querySelectorAll('.tasks-list').forEach(list => {
+            list.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                list.classList.add('drag-over');
+            });
+
+            list.addEventListener('dragleave', () => {
+                list.classList.remove('drag-over');
+            });
+
+            list.addEventListener('drop', handleDrop);
+        });
     }
 
     // Ajouter une tâche
@@ -119,8 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
             completed: false
         };
 
-        tasks[activeCategory].push(newTask);
-        tasks.all.push(newTask);
+        if (activeCategory === 'all') {
+            tasks.all.push(newTask);
+        } else {
+            tasks[activeCategory].push(newTask);
+            tasks.all.push(newTask);
+        }
 
         saveTasks();
         renderTasks();
@@ -142,6 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
         tasks[activeCategory].forEach(task => {
             const taskItem = document.createElement('li');
             taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
+            taskItem.draggable = true;
+            taskItem.dataset.id = task.id;
+            taskItem.dataset.category = activeCategory;
             taskItem.innerHTML = `
                 <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
                 <span class="task-text">${task.text}</span>
@@ -150,6 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="${translations[currentLang].delete}">${translations[currentLang].delete}</button>
                 </div>
             `;
+
+            // dragstart: provide task id and source category
+            taskItem.addEventListener('dragstart', (ev) => {
+                ev.dataTransfer.setData('text/plain', JSON.stringify({ id: task.id, from: activeCategory }));
+                ev.dataTransfer.effectAllowed = 'move';
+            });
+
             activeTaskList.appendChild(taskItem);
         });
 
@@ -179,6 +207,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveTasks();
         updateStats();
+    }
+
+    // Déplacer une tâche d'une catégorie à une autre via drag & drop
+    function handleDrop(e) {
+        e.preventDefault();
+        const list = e.currentTarget; // the <ul> drop target
+        list.classList.remove('drag-over');
+
+        let data;
+        try {
+            data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        } catch (err) {
+            return;
+        }
+
+        const taskId = parseInt(data.id, 10);
+        const fromCategory = String(data.from || 'all');
+        const toCategory = list.id.replace('-tasks-list', '');
+
+        if (!taskId || fromCategory === toCategory) return;
+
+        // Find the task object in tasks.all (canonical source)
+        let taskObj = tasks.all.find(t => t.id === taskId);
+        // If not found in all (edge case), try to find in fromCategory
+        if (!taskObj && tasks[fromCategory]) {
+            taskObj = tasks[fromCategory].find(t => t.id === taskId);
+            // ensure it's in all
+            if (taskObj && !tasks.all.some(t => t.id === taskId)) tasks.all.push(taskObj);
+        }
+
+        if (!taskObj) return;
+
+        // Remove from source category array if it's not 'all'
+        if (fromCategory !== 'all' && Array.isArray(tasks[fromCategory])) {
+            tasks[fromCategory] = tasks[fromCategory].filter(t => t.id !== taskId);
+        }
+
+        // Add to target category if it's not 'all' and not already present
+        if (toCategory !== 'all' && Array.isArray(tasks[toCategory])) {
+            if (!tasks[toCategory].some(t => t.id === taskId)) {
+                tasks[toCategory].push(taskObj);
+            }
+        }
+
+        // If target is 'all', ensure the task is present in tasks.all
+        if (toCategory === 'all' && !tasks.all.some(t => t.id === taskId)) {
+            tasks.all.push(taskObj);
+        }
+
+        saveTasks();
+        updateStats();
+        updateTaskCounts();
+
+        // Re-render both source and target lists if visible
+        // If the active view is one of them, renderTasks will update the visible list
+        renderTasks();
     }
 
     // Supprimer une tâche
