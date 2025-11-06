@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskCounts = document.querySelectorAll('.task-count');
     const statTotalTasks = document.getElementById('total-tasks');
     const statCompletedTasks = document.getElementById('completed-tasks');
+    const newListBtn = document.querySelector('.new-list-btn');
+    const modal = document.getElementById('new-category-modal');
+    const modalClose = document.querySelector('.modal-close');
+    const modalCancel = document.querySelector('.modal-cancel');
+    const modalCreate = document.querySelector('.modal-create');
+    const newCategoryInput = document.getElementById('new-category-name');
 
     // État initial de l'application
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {
@@ -38,6 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
         addTaskBtn.addEventListener('click', addTask);
         taskInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTask();
+        });
+
+        // Modal
+        newListBtn.addEventListener('click', openModal);
+        modalClose.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modalCreate.addEventListener('click', createNewCategory);
+        newCategoryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') createNewCategory();
         });
 
         // Changer de catégorie
@@ -136,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Supprimer une tâche
     function deleteTask(e) {
         const taskId = parseInt(e.target.dataset.id);
-
         tasks[activeCategory] = tasks[activeCategory].filter(task => task.id !== taskId);
         tasks.all = tasks.all.filter(task => task.id !== taskId);
 
@@ -152,8 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskItem = e.target.closest('.task-item');
         const taskTextElement = taskItem.querySelector('.task-text');
         const currentText = taskTextElement.textContent;
-
         const newText = prompt('Edit task:', currentText);
+
         if (newText !== null && newText.trim() !== '') {
             taskTextElement.textContent = newText.trim();
 
@@ -198,16 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.classList.add('active');
             }
         });
-
-        // Ici, vous pourriez ajouter une logique pour changer les textes de l'interface
-        // en fonction de la langue sélectionnée.
     }
 
     // Mettre à jour les statistiques
     function updateStats() {
         const totalTasks = tasks.all.length;
         const completedTasks = tasks.all.filter(task => task.completed).length;
-
         statTotalTasks.textContent = totalTasks;
         statCompletedTasks.textContent = completedTasks;
     }
@@ -216,12 +226,82 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateTaskCounts() {
         taskCounts.forEach(count => {
             const category = count.id.replace('-tasks-count', '');
-            count.textContent = tasks[category].length;
+            count.textContent = tasks[category] ? tasks[category].length : 0;
         });
     }
 
     // Sauvegarder les tâches dans localStorage
     function saveTasks() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Ouvrir la modal
+    function openModal() {
+        modal.classList.add('active');
+        newCategoryInput.focus();
+    }
+
+    // Fermer la modal
+    function closeModal() {
+        modal.classList.remove('active');
+        newCategoryInput.value = '';
+    }
+
+    // Créer une nouvelle catégorie
+    function createNewCategory() {
+        const categoryName = newCategoryInput.value.trim().toLowerCase();
+
+        if (!categoryName) {
+            alert('Please enter a category name');
+            return;
+        }
+
+        // Vérifier si la catégorie existe déjà
+        if (tasks[categoryName]) {
+            alert('This category already exists');
+            return;
+        }
+
+        // Créer la nouvelle catégorie
+        tasks[categoryName] = [];
+
+        // Ajouter le bouton dans la sidebar
+        const categoriesUl = document.querySelector('.categories ul');
+        const newLi = document.createElement('li');
+        newLi.innerHTML = `<a href="#" data-category="${categoryName}">${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}</a>`;
+        categoriesUl.appendChild(newLi);
+
+        // Créer la section de tâches pour cette catégorie
+        const tasksArea = document.querySelector('.tasks-area');
+        const newCategoryDiv = document.createElement('div');
+        newCategoryDiv.className = 'task-category';
+        newCategoryDiv.id = `category-${categoryName}`;
+        newCategoryDiv.innerHTML = `
+            <div class="category-header">
+                <h2>${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}</h2>
+                <span class="task-count" id="${categoryName}-tasks-count">0</span>
+            </div>
+            <div class="task-input-container">
+                <input type="text" class="task-input" placeholder="Add a new task...">
+                <button class="add-task-btn">Add</button>
+            </div>
+            <ul class="tasks-list" id="${categoryName}-tasks-list"></ul>
+        `;
+        tasksArea.appendChild(newCategoryDiv);
+
+        // Ajouter l'écouteur d'événement au nouveau bouton
+        const newButton = newLi.querySelector('a');
+        newButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            changeCategory(categoryName);
+        });
+
+        // Sauvegarder et fermer
+        saveTasks();
+        updateTaskCounts();
+        closeModal();
+
+        // Optionnel : basculer vers la nouvelle catégorie
+        changeCategory(categoryName);
     }
 });
