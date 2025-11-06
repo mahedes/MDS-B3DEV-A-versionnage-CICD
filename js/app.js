@@ -1,4 +1,3 @@
-// Attendre que le DOM soit chargé
 document.addEventListener('DOMContentLoaded', () => {
     // Sélection des éléments du DOM
     const taskInput = document.querySelector('.task-input');
@@ -26,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Catégorie active par défaut
     let activeCategory = 'all';
+    // Priorité active par défaut
+    let activePriority = 'low';
 
     // Initialisation
     init();
@@ -44,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
         addTaskBtn.addEventListener('click', addTask);
         taskInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTask();
+        });
+
+        // Écouteur pour le bouton de priorité
+        document.querySelectorAll('.priority-btn').forEach(button => {
+            button.addEventListener('click', togglePriority);
         });
 
         // Modal
@@ -71,15 +77,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Fonction pour changer la priorité
+    function togglePriority(e) {
+        const button = e.target;
+        const priorities = ['low', 'medium', 'high'];
+        const currentIndex = priorities.indexOf(activePriority);
+        const nextIndex = (currentIndex + 1) % priorities.length;
+        activePriority = priorities[nextIndex];
+        button.dataset.priority = activePriority;
+        button.textContent = getPriorityEmoji(activePriority);
+    }
+
+    // Fonction pour obtenir l'emoji de priorité
+    function getPriorityEmoji(priority) {
+        const emojis = {
+            'low': '🟢',
+            'medium': '🟡',
+            'high': '🔴'
+        };
+        return emojis[priority];
+    }
+
     // Ajouter une tâche
     function addTask() {
-        const taskText = taskInput.value.trim();
+        const taskText = document.querySelector(`.task-category.active .task-input`).value.trim();
         if (!taskText) return;
 
         const newTask = {
             id: Date.now(),
             text: taskText,
-            completed: false
+            completed: false,
+            priority: activePriority
         };
 
         if (activeCategory === 'all') {
@@ -93,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks();
         updateStats();
         updateTaskCounts();
-        taskInput.value = '';
+        document.querySelector(`.task-category.active .task-input`).value = '';
     }
 
     // Rendre les tâches
@@ -108,10 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tasks[activeCategory].forEach(task => {
             const taskItem = document.createElement('li');
-            taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
+            taskItem.className = `task-item ${task.completed ? 'completed' : ''} ${task.priority}-priority`;
             taskItem.innerHTML = `
                 <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
                 <span class="task-text">${task.text}</span>
+                <span class="task-priority-indicator">${getPriorityEmoji(task.priority)}</span>
                 <div class="task-actions">
                     <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
                     <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
@@ -166,8 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskItem = e.target.closest('.task-item');
         const taskTextElement = taskItem.querySelector('.task-text');
         const currentText = taskTextElement.textContent;
-        const newText = prompt('Edit task:', currentText);
 
+        const newText = prompt('Edit task:', currentText);
         if (newText !== null && newText.trim() !== '') {
             taskTextElement.textContent = newText.trim();
 
@@ -284,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="task-input-container">
                 <input type="text" class="task-input" placeholder="Add a new task...">
                 <button class="add-task-btn">Add</button>
+                <button class="priority-btn" data-priority="low">🟢</button>
             </div>
             <ul class="tasks-list" id="${categoryName}-tasks-list"></ul>
         `;
@@ -295,6 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             changeCategory(categoryName);
         });
+
+        // Ajouter l'écouteur pour le bouton de priorité de la nouvelle catégorie
+        const newPriorityBtn = newCategoryDiv.querySelector('.priority-btn');
+        newPriorityBtn.addEventListener('click', togglePriority);
 
         // Sauvegarder et fermer
         saveTasks();
