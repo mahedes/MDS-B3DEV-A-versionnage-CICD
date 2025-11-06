@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Sélection des éléments du DOM
     const taskInput = document.querySelector('.task-input');
     const addTaskBtn = document.querySelector('.add-task-btn');
     const taskLists = document.querySelectorAll('.tasks-list');
@@ -15,6 +14,72 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCreate = document.querySelector('.modal-create');
     const newCategoryInput = document.getElementById('new-category-name');
 
+    const translations = {
+        en: {
+            edit: 'Edit',
+            delete: 'Delete',
+            editPrompt: 'Edit task:',
+            emptyState: 'No tasks yet. Add one above!'
+        },
+        fr: {
+            edit: 'Modifier',
+            delete: 'Supprimer',
+            editPrompt: 'Modifier la tâche :',
+            emptyState: 'Aucune tâche pour le moment. Ajoutez-en une !'
+        }
+    };
+
+    // Textes de traduction
+    const translations = {
+        en: {
+            title: "TodoList Pro",
+            inputPlaceholder: "Add a new task...",
+            addButton: "Add",
+            all: "All Tasks",
+            work: "Work",
+            personal: "Personal",
+            shopping: "Shopping",
+            totalTasks: "Total Tasks",
+            completedTasks: "Completed Tasks",
+            emptyState: "No tasks yet. Add one above!",
+            edit: "Edit",
+            delete: "Delete",
+            editPrompt: "Edit task:",
+            categories: "Categories",
+            stats: "Stats",
+            newList: "+ New List",
+            copyright: "© 2025 TodoList Pro. All rights reserved.",
+            about: "About",
+            help: "Help",
+            slogan: "Organize your tasks efficiently"
+        },
+        fr: {
+            title: "Liste de Tâches Pro",
+            inputPlaceholder: "Ajouter une nouvelle tâche...",
+            addButton: "Ajouter",
+            all: "Toutes les Tâches",
+            work: "Travail",
+            personal: "Personnel",
+            shopping: "Courses",
+            totalTasks: "Tâches Totales",
+            completedTasks: "Tâches Terminées",
+            emptyState: "Aucune tâche pour le moment. Ajoutez-en une !",
+            edit: "Modifier",
+            delete: "Supprimer",
+            editPrompt: "Modifier la tâche :",
+            categories: "Catégories",
+            stats: "Statistiques",
+            newList: "+ Nouvelle Liste",
+            copyright: "© 2025 Liste de Tâches Pro. Tous droits réservés.",
+            about: "À propos",
+            help: "Aide",
+            slogan: "Organisez vos tâches efficacement"
+        }
+    };
+
+    // Langue par défaut
+    let currentLang = 'en';
+
     // État initial de l'application
     let tasks = JSON.parse(localStorage.getItem('tasks')) || {
         all: [],
@@ -22,28 +87,23 @@ document.addEventListener('DOMContentLoaded', () => {
         personal: [],
         shopping: []
     };
-
-    // Catégorie active par défaut
     let activeCategory = 'all';
     // Priorité active par défaut
     let activePriority = 'low';
 
-    // Initialisation
     init();
 
-    // Fonction d'initialisation
     function init() {
         renderTasks();
         updateStats();
         updateTaskCounts();
         setupEventListeners();
+        updateLanguage(); // Appliquer la langue au chargement
     }
 
-    // Configuration des écouteurs d'événements
     function setupEventListeners() {
-        // Ajouter une tâche
         addTaskBtn.addEventListener('click', addTask);
-        taskInput.addEventListener('keypress', (e) => {
+        taskInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') addTask();
         });
 
@@ -57,23 +117,36 @@ document.addEventListener('DOMContentLoaded', () => {
         modalClose.addEventListener('click', closeModal);
         modalCancel.addEventListener('click', closeModal);
         modalCreate.addEventListener('click', createNewCategory);
-        newCategoryInput.addEventListener('keypress', (e) => {
+        newCategoryInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') createNewCategory();
         });
 
-        // Changer de catégorie
+        // Catégories
         categoryButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
+            button.addEventListener('click', e => {
                 e.preventDefault();
                 changeCategory(button.dataset.category);
             });
         });
 
-        // Changer de langue
         langButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                changeLanguage(button.dataset.lang);
+            button.addEventListener('click', () => changeLanguage(button.dataset.lang));
+        });
+
+        if (statCompletedTasks) {
+            statCompletedTasks.addEventListener('click', e => {
+                e.preventDefault();
+                changeCategory('completed');
             });
+        }
+
+        taskLists.forEach(list => {
+            list.addEventListener('dragover', e => {
+                e.preventDefault();
+                list.classList.add('drag-over');
+            });
+            list.addEventListener('dragleave', () => list.classList.remove('drag-over'));
+            list.addEventListener('drop', handleDrop);
         });
     }
 
@@ -124,17 +197,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector(`.task-category.active .task-input`).value = '';
     }
 
-    // Rendre les tâches
     function renderTasks() {
         const activeTaskList = document.getElementById(`${activeCategory}-tasks-list`);
+        if (!activeTaskList) return;
         activeTaskList.innerHTML = '';
 
         if (tasks[activeCategory].length === 0) {
-            activeTaskList.innerHTML = '<div class="empty-state">No tasks yet. Add one above!</div>';
+            activeTaskList.innerHTML = `<div class="empty-state">${translations[currentLang].emptyState}</div>`;
             return;
         }
 
-        tasks[activeCategory].forEach(task => {
+        tasksToRender.forEach(task => {
             const taskItem = document.createElement('li');
             taskItem.className = `task-item ${task.completed ? 'completed' : ''} ${task.priority}-priority`;
             taskItem.innerHTML = `
@@ -142,54 +215,86 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="task-text">${task.text}</span>
                 <span class="task-priority-indicator">${getPriorityEmoji(task.priority)}</span>
                 <div class="task-actions">
-                    <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="Edit task">Edit</button>
-                    <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="Delete task">Delete</button>
+                    <button class="task-action-btn btn-edit" data-id="${task.id}" aria-label="${translations[currentLang].edit}">${translations[currentLang].edit}</button>
+                    <button class="task-action-btn btn-delete" data-id="${task.id}" aria-label="${translations[currentLang].delete}">${translations[currentLang].delete}</button>
                 </div>
             `;
+
+            taskItem.addEventListener('dragstart', ev => {
+                ev.dataTransfer.setData('text/plain', JSON.stringify({ id: task.id, from: activeCategory }));
+                ev.dataTransfer.effectAllowed = 'move';
+            });
+
             activeTaskList.appendChild(taskItem);
         });
 
-        // Ajouter les écouteurs pour les boutons des tâches
         document.querySelectorAll('.task-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', toggleTaskCompletion);
         });
-
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', deleteTask);
-        });
-
-        document.querySelectorAll('.btn-edit').forEach(button => {
-            button.addEventListener('click', editTask);
-        });
+        document.querySelectorAll('.btn-delete').forEach(btn => btn.addEventListener('click', deleteTask));
+        document.querySelectorAll('.btn-edit').forEach(btn => btn.addEventListener('click', editTask));
     }
 
-    // Basculer l'état de complétion d'une tâche
     function toggleTaskCompletion(e) {
-        const taskId = parseInt(e.target.dataset.id);
-        const taskIndex = tasks[activeCategory].findIndex(task => task.id === taskId);
-        tasks[activeCategory][taskIndex].completed = e.target.checked;
+        const taskId = parseInt(e.target.dataset.id, 10);
+        const checked = e.target.checked;
 
-        // Mettre à jour dans "all"
-        const allTaskIndex = tasks.all.findIndex(task => task.id === taskId);
-        tasks.all[allTaskIndex].completed = e.target.checked;
+        const allTask = tasks.all.find(t => t.id === taskId);
+        if (allTask) allTask.completed = checked;
+
+        Object.keys(tasks).forEach(cat => {
+            if (Array.isArray(tasks[cat])) {
+                const t = tasks[cat].find(x => x.id === taskId);
+                if (t) t.completed = checked;
+            }
+        });
 
         saveTasks();
         updateStats();
+        renderTasks();
     }
 
-    // Supprimer une tâche
-    function deleteTask(e) {
-        const taskId = parseInt(e.target.dataset.id);
-        tasks[activeCategory] = tasks[activeCategory].filter(task => task.id !== taskId);
-        tasks.all = tasks.all.filter(task => task.id !== taskId);
+    function handleDrop(e) {
+        e.preventDefault();
+        const list = e.currentTarget;
+        list.classList.remove('drag-over');
 
+        let data;
+        try {
+            data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        } catch {
+            return;
+        }
+
+        const taskId = parseInt(data.id, 10);
+        const fromCategory = data.from;
+        const toCategory = list.id.replace('-tasks-list', '');
+
+        if (!taskId || fromCategory === toCategory) return;
+        const taskObj = tasks[fromCategory].find(t => t.id === taskId);
+        if (!taskObj) return;
+
+        tasks[fromCategory] = tasks[fromCategory].filter(t => t.id !== taskId);
+        if (!Array.isArray(tasks[toCategory])) tasks[toCategory] = [];
+        tasks[toCategory].push(taskObj);
+
+        saveTasks();
+        updateStats();
+        updateTaskCounts();
+        renderTasks();
+    }
+
+    function deleteTask(e) {
+        const taskId = parseInt(e.target.dataset.id, 10);
+        Object.keys(tasks).forEach(cat => {
+            if (Array.isArray(tasks[cat])) tasks[cat] = tasks[cat].filter(t => t.id !== taskId);
+        });
         saveTasks();
         renderTasks();
         updateStats();
         updateTaskCounts();
     }
 
-    // Modifier une tâche
     function editTask(e) {
         const taskId = parseInt(e.target.dataset.id);
         const taskItem = e.target.closest('.task-item');
@@ -208,58 +313,108 @@ document.addEventListener('DOMContentLoaded', () => {
             tasks.all[allTaskIndex].text = newText.trim();
 
             saveTasks();
+            renderTasks();
         }
     }
 
-    // Changer de catégorie
     function changeCategory(category) {
-        // Masquer toutes les catégories
-        document.querySelectorAll('.task-category').forEach(cat => {
-            cat.classList.remove('active');
-        });
-
-        // Afficher la catégorie sélectionnée
-        document.getElementById(`category-${category}`).classList.add('active');
+        document.querySelectorAll('.task-category').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById(`category-${category}`);
+        if (target) target.classList.add('active');
         activeCategory = category;
 
-        // Mettre à jour les boutons de catégorie
-        categoryButtons.forEach(button => {
-            button.closest('li').classList.remove('active');
-            if (button.dataset.category === category) {
-                button.closest('li').classList.add('active');
-            }
+        categoryButtons.forEach(btn => {
+            btn.closest('li').classList.remove('active');
+            if (btn.dataset.category === category) btn.closest('li').classList.add('active');
         });
 
         renderTasks();
     }
 
-    // Changer de langue
     function changeLanguage(lang) {
+        currentLang = lang;
+        
+        // Mettre à jour les boutons de langue
         langButtons.forEach(button => {
             button.classList.remove('active');
             if (button.dataset.lang === lang) {
                 button.classList.add('active');
             }
         });
+        updateLanguage();
+        renderTasks();
     }
 
-    // Mettre à jour les statistiques
+        // Mettre à jour tous les textes de l'interface
+        updateLanguage();
+        
+        // Re-rendre les tâches pour mettre à jour les boutons Edit/Delete
+        renderTasks();
+    }
+
+    // Mettre à jour tous les textes de l'interface
+    function updateLanguage() {
+        const t = translations[currentLang];
+        
+        // Mettre à jour le titre
+        document.querySelector('h1').textContent = t.title;
+        
+        // Mettre à jour le slogan
+        document.querySelector('.app-header p').textContent = t.slogan;
+        
+        // Mettre à jour le placeholder de l'input
+        taskInput.placeholder = t.inputPlaceholder;
+        
+        // Mettre à jour le bouton d'ajout
+        addTaskBtn.textContent = t.addButton;
+        
+        // Mettre à jour le bouton New List
+        document.querySelector('.new-list-btn').textContent = t.newList;
+        
+        // Mettre à jour les titres des sections
+        document.querySelector('.categories h3').textContent = t.categories;
+        document.querySelector('.stats h3').textContent = t.stats;
+        
+        // Mettre à jour les catégories
+        document.querySelector('[data-category="all"]').textContent = t.all;
+        document.querySelector('[data-category="work"]').textContent = t.work;
+        document.querySelector('[data-category="personal"]').textContent = t.personal;
+        document.querySelector('[data-category="shopping"]').textContent = t.shopping;
+        
+        // Mettre à jour les titres des catégories dans la zone des tâches
+        document.querySelector('#category-all h2').textContent = t.all;
+        document.querySelector('#category-work h2').textContent = t.work;
+        document.querySelector('#category-personal h2').textContent = t.personal;
+        document.querySelector('#category-shopping h2').textContent = t.shopping;
+        
+        // Mettre à jour les statistiques - CORRECTION ICI
+        const statItems = document.querySelectorAll('.stat-item');
+        statItems[0].querySelector('.stat-label').textContent = t.totalTasks;
+        statItems[1].querySelector('.stat-label').textContent = t.completedTasks;
+        
+        // Mettre à jour le footer
+        document.querySelector('.app-footer p').textContent = t.copyright;
+        document.querySelectorAll('.btn-secondary')[0].textContent = t.about;
+        document.querySelectorAll('.btn-secondary')[1].textContent = t.help;
+    }
+
     function updateStats() {
-        const totalTasks = tasks.all.length;
-        const completedTasks = tasks.all.filter(task => task.completed).length;
-        statTotalTasks.textContent = totalTasks;
-        statCompletedTasks.textContent = completedTasks;
+        const total = tasks.all.length;
+        const completed = tasks.all.filter(t => t.completed).length;
+        if (statTotalTasks) statTotalTasks.textContent = total;
+        if (statCompletedTasks) statCompletedTasks.textContent = completed;
     }
 
-    // Mettre à jour le compteur de tâches par catégorie
     function updateTaskCounts() {
         taskCounts.forEach(count => {
-            const category = count.id.replace('-tasks-count', '');
-            count.textContent = tasks[category] ? tasks[category].length : 0;
+            const cat = count.id.replace('-tasks-count', '');
+            count.textContent =
+                cat === 'completed'
+                    ? tasks.all.filter(t => t.completed).length
+                    : (Array.isArray(tasks[cat]) ? tasks[cat].length : 0);
         });
     }
 
-    // Sauvegarder les tâches dans localStorage
     function saveTasks() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
